@@ -2,13 +2,17 @@ package gonweb
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"net/url"
 )
 
 type GonContext struct {
-	W      http.ResponseWriter
-	R      *http.Request
-	Values map[string]string
+	W            http.ResponseWriter
+	R            *http.Request
+	Values       map[string]string
+	ResponsData  []byte
+	ResponStatus int
 }
 
 type ResponsData struct {
@@ -38,8 +42,8 @@ func (g *GonContext) ResponsJson(code int, data string) {
 	}
 	json_data, err := json.Marshal(d)
 	if err != nil {
-		g.WriteHeader(http.StatusInternalServerError)
-		g.Write([]byte(err.Error()))
+		g.ResponStatus = http.StatusInternalServerError
+		g.ResponsData = []byte(err.Error())
 		return
 	}
 	g.WriteHeader(code)
@@ -51,8 +55,8 @@ func (g *GonContext) HeaderSet(k, v string) {
 }
 
 func (g *GonContext) Respons(code int, data string) {
-	g.WriteHeader(code)
-	g.Write([]byte(data))
+	g.ResponStatus = code
+	g.ResponsData = []byte(data)
 }
 
 func (g *GonContext) JsonOk(data string) {
@@ -74,10 +78,45 @@ func (g *GonContext) JsonServerError(data string) {
 func (g *GonContext) ServerError(data string) {
 	g.Respons(http.StatusInternalServerError, data)
 }
+
+func (g *GonContext) Form() url.Values {
+
+	err := g.R.ParseForm()
+	if err != nil {
+		return nil
+	}
+	return g.R.PostForm
+
+}
+
+func (g *GonContext) FormValue(key string) (string, error) {
+	if err := g.R.ParseForm(); err != nil {
+		return "", err
+	}
+	return g.R.FormValue(key), nil
+}
+
+func (g *GonContext) QueryParam() url.Values {
+	return g.R.URL.Query()
+}
+
+func (g *GonContext) QueryValue(key string) (string, error) {
+	p := g.QueryParam()
+	if p == nil {
+		return "", errors.New("not found res")
+	}
+	vals, ok := p[key]
+	if !ok {
+		return "", errors.New("not found this key")
+	}
+	return vals[0], nil
+}
+
 func MakeContext(w http.ResponseWriter, r *http.Request) *GonContext {
 	return &GonContext{
-		W:      w,
-		R:      r,
-		Values: make(map[string]string),
+		W:            w,
+		R:            r,
+		Values:       make(map[string]string),
+		ResponStatus: http.StatusOK,
 	}
 }

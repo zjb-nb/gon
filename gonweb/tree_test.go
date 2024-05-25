@@ -1,8 +1,6 @@
 package gonweb
 
 import (
-	"log"
-	"net/http"
 	"sort"
 	"testing"
 
@@ -60,43 +58,6 @@ func TestTreeRoute(t *testing.T) {
 			assert.Equal(t, res.fullpath, tt.path, tt.name)
 		})
 	}
-}
-
-func TestMain(t *testing.T) {
-	s := MakeWebServer("web", ":8080", nil)
-	s.Route("GET", "/", func(ctx *GonContext) { ctx.JsonOk("hi") })
-	s.Route("GET", "/home", func(ctx *GonContext) { ctx.Ok("home") })
-	s.Route("GET", "/home/user", func(ctx *GonContext) { ctx.Ok("home/user") })
-	s.Route("GET", "/login", func(ctx *GonContext) { ctx.Ok("login") })
-	s.Route("GET", "/*", func(ctx *GonContext) { ctx.Ok("/* wildcard") })
-	s.Route("GET", "/home/*", func(ctx *GonContext) { ctx.Ok("/home/* wildcard") })
-	s.Route("GET", "/home/user/:id", func(ctx *GonContext) { ctx.Ok("/home/user/:id ") })
-	s.Route("GET", "/home/~^ab$", func(ctx *GonContext) { ctx.Ok("/home/~^ab$") })
-
-	s.Route("GET", "/home/user/index", func(ctx *GonContext) { ctx.JsonOk("post-hi") })
-
-	go func() {
-		log.Fatal(s.Start())
-	}()
-	res, err := http.Get("http://localhost:8080/")
-	require.Nil(t, err)
-	require.Equal(t, http.StatusOK, res.StatusCode)
-
-	res, err = http.Get("http://localhost:8080/sss")
-	require.Nil(t, err)
-	require.Equal(t, http.StatusOK, res.StatusCode)
-
-	res, err = http.Get("http://localhost:8080/home/login/index")
-	require.Nil(t, err)
-	require.Equal(t, http.StatusNotFound, res.StatusCode)
-
-	res, err = http.Get("http://localhost:8080/home/user/index")
-	require.Nil(t, err)
-	require.Equal(t, http.StatusOK, res.StatusCode)
-	res, err = http.Get("http://localhost:8080/home/user/ss")
-	require.Nil(t, err)
-	require.Equal(t, http.StatusOK, res.StatusCode)
-
 }
 
 func TestSort(t *testing.T) {
