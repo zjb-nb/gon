@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 )
 
 type GonHandlerFunc func(ctx *GonContext)
@@ -63,13 +64,14 @@ func (s *WebServer) Start() error {
 	if err != nil {
 		panic(fmt.Sprintf("server-%s start failed:%s\n", s.name, err))
 	}
-	fmt.Printf("server-%s start at port:%s", s.name, s.addr)
+	fmt.Printf("server-%s start at port:%s\n", s.name, s.addr)
 	//TODO服务注册与发现 map[xxx]xxx append
 	return http.Serve(l, s)
 }
 
 func (s *WebServer) ShutDown() error {
-	fmt.Printf("server-%s is Closing", s.name)
+	time.Sleep(time.Second * 5)
+	fmt.Printf("server-%s start Closing\n", s.name)
 	return nil
 }
 

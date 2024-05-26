@@ -46,8 +46,8 @@ func (g *GonContext) ResponsJson(code int, data string) {
 		g.ResponsData = []byte(err.Error())
 		return
 	}
-	g.WriteHeader(code)
-	g.Write(json_data)
+	g.ResponStatus = code
+	g.ResponsData = json_data
 }
 
 func (g *GonContext) HeaderSet(k, v string) {
