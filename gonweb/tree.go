@@ -38,7 +38,7 @@ func (t *RouteBaseOnTree) route(method, pattern string) *treeNode {
 		t.trees[method] = root
 	}
 	pattern = strings.Trim(strings.Trim(pattern, ""), "/")
-	ok = t.validPath(pattern)
+	ok = validPath(pattern)
 	if !ok {
 		panic("add illegal route!")
 	}
@@ -52,19 +52,6 @@ func (t *RouteBaseOnTree) route(method, pattern string) *treeNode {
 		root = t.findOrCreate(path, fullpath, root)
 	}
 	return root
-}
-
-/*
-通配符必须作为最后出现且前一个必须为/
-*/
-func (t *RouteBaseOnTree) validPath(p string) bool {
-	pos := strings.Index(p, "*")
-	if pos > 0 {
-		if p[pos-1] != '/' || pos != len(p)-1 {
-			return false
-		}
-	}
-	return true
 }
 
 func (t *RouteBaseOnTree) findOrCreate(p string, fullpath string, root *treeNode) *treeNode {

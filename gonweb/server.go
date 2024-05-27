@@ -46,17 +46,17 @@ func (s *WebServer) Route(method, pattern string, f GonHandlerFunc) {
 	s.handler.Route(method, pattern, f)
 }
 
-func (s *WebServer) GET(method, pattern string, f GonHandlerFunc) {
+func (s *WebServer) GET(pattern string, f GonHandlerFunc) {
 	s.Route("GET", pattern, f)
 }
 
-func (s *WebServer) POST(method, pattern string, f GonHandlerFunc) {
+func (s *WebServer) POST(pattern string, f GonHandlerFunc) {
 	s.Route("POST", pattern, f)
 }
-func (s *WebServer) PUT(method, pattern string, f GonHandlerFunc) {
+func (s *WebServer) PUT(pattern string, f GonHandlerFunc) {
 	s.Route("PUT", pattern, f)
 }
-func (s *WebServer) DELETE(method, pattern string, f GonHandlerFunc) {
+func (s *WebServer) DELETE(pattern string, f GonHandlerFunc) {
 	s.Route("DELETE", pattern, f)
 }
 func (s *WebServer) Start() error {
@@ -87,4 +87,22 @@ func MakeWebServer(name, addr string, h Handler, builders ...FilterBuilder) *Web
 		handler:  h,
 		builders: builders,
 	}
+}
+
+type RouteGroup struct {
+	prefix string
+	s      Server
+	h      []FilterBuilder
+}
+
+func NewGroup(p string, s Server, b ...FilterBuilder) *RouteGroup {
+	return &RouteGroup{
+		prefix: p,
+		s:      s,
+		h:      b,
+	}
+}
+
+func (g *RouteGroup) Route(method, pattern string, f GonHandlerFunc) {
+	g.s.Route(method, g.prefix+pattern, f)
 }

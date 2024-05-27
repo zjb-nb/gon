@@ -1,7 +1,7 @@
 package gonweb
 
 import (
-	"sort"
+	"log"
 	"testing"
 
 	"github.com/magiconair/properties/assert"
@@ -60,10 +60,11 @@ func TestTreeRoute(t *testing.T) {
 	}
 }
 
-func TestSort(t *testing.T) {
-	a := []int{1}
-	sort.Slice(a, func(i, j int) bool {
-		return a[i] < a[j]
-	})
-	t.Log(a)
+func TestRadixTrie(t *testing.T) {
+	s := MakeWebServer("trie", ":8080", MakeradixTree())
+	s.GET("/", func(ctx *GonContext) { ctx.W.Write([]byte("/")) })
+	s.GET("/home", func(ctx *GonContext) { ctx.W.Write([]byte("/home")) })
+	s.GET("/ap", func(ctx *GonContext) { ctx.W.Write([]byte("/ap")) })
+	s.GET("/apple", func(ctx *GonContext) { ctx.W.Write([]byte("/apple")) })
+	log.Fatal(s.Start())
 }
